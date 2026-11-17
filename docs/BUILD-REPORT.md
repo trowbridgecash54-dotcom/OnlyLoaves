@@ -71,7 +71,7 @@ Run with a local preview server. It uses the project's real pages, components, f
 
 ## Known issues and limits
 
-- **Deployed, but not yet exercised end to end in production.** The live pages render (checked: home, /bread). Form submissions and dashboard sign-in on the live site still need `SUPABASE_SECRET_KEY` in Vercel and an owner account; neither exists yet.
+- **Deployed, but not yet exercised end to end in production.** The live pages render (checked: home, /bread). `SUPABASE_SECRET_KEY` and the owner account are now in place; a real sign-in and a test submission on the live site haven't been done by me.
 - **Fonts:** confirmed on the live site (self-hosted woff2 files preloaded). The sandbox screenshots used substitute fonts.
 - **Supabase Auth settings** (turning off public sign-up, the Site URL) must be changed in the Supabase dashboard; the connector can't.
 - A loaf can be recorded on a date inside the member's first month but before their start date. Minor; the dates are shown in the history.
@@ -86,7 +86,7 @@ The previous version reported 30 open items. Each has been reviewed:
 | --- | --- |
 | **1. Resolved in code** | Website address: no longer a fake `.example` value; it comes from `NEXT_PUBLIC_SITE_URL`, falling back to Vercel's address. Email and Instagram: the fake placeholder values are gone; both are optional, editable in the dashboard, and hidden until set, so no broken links. Editing config files: replaced by the dashboard. |
 | **2. Needs real business information** | Prices (3), ingredients (3), allergens (3), real photos (3) for each loaf; Our Story (5 sections, plus an optional baker photo); homepage and Club photos; pickup days; general pickup area; optional public email and Instagram. |
-| **3. Needs an external service or account** | Supabase secret key in Vercel; owner account created; domain (when registered); Resend (optional). |
+| **3. Needs an external service or account** | domain (when registered); Resend (optional). |
 | **4. Needs legal or business-policy confirmation** | Club policies: payment, renewal, pausing and canceling, missed pickups, unused loaves, refunds; cottage-food permit approved; food-label information confirmed; required footer disclosures; then opening ordering. |
 
 The dashboard's checklist now has 39 items. It is more detailed than before: it adds photos, permit, labels, refunds, disclosures, the open-ordering switch and the accounts above. **1 is done** (database connected), **34 required items remain**, and 4 are optional.
@@ -99,4 +99,5 @@ The dashboard's checklist now has 39 items. It is more detailed than before: it 
 | Production address | https://onlyloafs.vercel.app — fetched without a login: home page title "OnlyLoafs — Small-batch sourdough for local pickup". |
 | Deployment-specific URLs (`*-only-loaves.vercel.app`) | Behind Vercel's deployment protection (redirect to Vercel login) and marked `noindex`. That's Vercel's default and is fine; the production address is public. |
 | Security headers on live responses | HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, referrer and permissions policies present. |
-| Environment variables | Public Supabase URL and publishable key set. `SUPABASE_SECRET_KEY`, `NEXT_PUBLIC_SITE_URL`, Resend variables: not set. |
+| Environment variables | Public Supabase URL, publishable key and `SUPABASE_SECRET_KEY` set. `NEXT_PUBLIC_SITE_URL`, Resend variables: not set. |
+| Owner account | Created in Supabase Auth by the developer, then added to `admins`. Checked as that user under RLS: `is_admin()` is true. |
