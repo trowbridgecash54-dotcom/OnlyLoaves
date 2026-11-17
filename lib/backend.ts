@@ -43,15 +43,37 @@ export function canSaveSubmissions(): boolean {
 
 /* ---------- Db on top of the Supabase client ---------- */
 
-type Query = {
-  eq(column: string, value: unknown): Query;
-  is(column: string, value: null): Query;
-  gte(column: string, value: unknown): Query;
-  in(column: string, values: unknown[]): Query;
+type Result = { data: unknown; error: { message: string; code?: string } | null };
+
+/**
+ * The few query-builder methods this file uses. Supabase's own builder
+ * types are generated per table and nest so deeply that TypeScript gives
+ * up on them for a dynamic table name, so the builder is viewed through
+ * this small interface instead. Runtime behaviour is unchanged.
+ */
+type Builder = PromiseLike<Result> & {
+  eq(column: string, value: unknown): Builder;
+  is(column: string, value: null): Builder;
+  gte(column: string, value: unknown): Builder;
+  in(column: string, values: unknown[]): Builder;
+  order(column: string, options: { ascending: boolean }): Builder;
+  limit(count: number): Builder;
+  select(columns?: string): Builder;
+  single(): Builder;
 };
 
-function applyFilter<Q extends Query>(query: Q, filter: Filter | undefined): Q {
-  let next: Query = query;
+type Table = {
+  select(columns: string): Builder;
+  insert(row: Row): Builder;
+  upsert(row: Row, options: { onConflict: string }): Builder;
+  update(patch: Row): Builder;
+  delete(): Builder;
+};
+
+const table = (client: SupabaseClient, name: string) => client.from(name) as unknown as Table;
+
+function applyFilter(query: Builder, filter: Filter | undefined): Builder {
+  let next = query;
   for (const [column, value] of Object.entries(filter ?? {})) {
     if (value !== null && typeof value === "object") {
       next = "gte" in value ? next.gte(column, value.gte) : next.in(column, value.in);
@@ -61,10 +83,10 @@ function applyFilter<Q extends Query>(query: Q, filter: Filter | undefined): Q {
       next = next.eq(column, value);
     }
   }
-  return next as Q;
+  return next;
 }
 
-function check<T>(result: { data: T | null; error: { message: string; code?: string } | null }): T {
+function check<T>(result: Result): T {
   if (result.error) throw new DbError(result.error.message, result.error.code ?? "");
   return result.data as T;
 }
@@ -72,29 +94,29 @@ function check<T>(result: { data: T | null; error: { message: string; code?: str
 function toDb(client: SupabaseClient): Db {
   return {
     async rpc<T>(fn: string, args: Row = {}) {
-      return check<T>(await client.rpc(fn, args));
+      return check<T>((await client.rpc(fn, args)) as Result);
     },
-    async select<T>(table: string, options: SelectOptions = {}) {
-      let query = applyFilter(client.from(table).select("*"), options.filter);
+    async select<T>(name: string, options: SelectOptions = {}) {
+      let query = applyFilter(table(client, name).select("*"), options.filter);
       for (const [column, direction] of options.order ?? []) {
         query = query.order(column, { ascending: direction === "asc" });
       }
       if (options.limit) query = query.limit(options.limit);
       return check<T[]>(await query);
     },
-    async insert<T>(table: string, row: Row) {
-      return check<T>(await client.from(table).insert(row).select().single());
+    async insert<T>(name: string, row: Row) {
+      return check<T>(await table(client, name).insert(row).select().single());
     },
-    async upsert<T>(table: string, row: Row, conflictColumn: string) {
+    async upsert<T>(name: string, row: Row, conflictColumn: string) {
       return check<T>(
-        await client.from(table).upsert(row, { onConflict: conflictColumn }).select().single(),
+        await table(client, name).upsert(row, { onConflict: conflictColumn }).select().single(),
       );
     },
-    async update<T>(table: string, filter: Filter, patch: Row) {
-      return check<T[]>(await applyFilter(client.from(table).update(patch), filter).select());
+    async update<T>(name: string, filter: Filter, patch: Row) {
+      return check<T[]>(await applyFilter(table(client, name).update(patch), filter).select());
     },
-    async remove(table: string, filter: Filter) {
-      check(await applyFilter(client.from(table).delete(), filter));
+    async remove(name: string, filter: Filter) {
+      check(await applyFilter(table(client, name).delete(), filter));
     },
   };
 }

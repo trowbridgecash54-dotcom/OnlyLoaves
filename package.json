@@ -13,7 +13,7 @@
     "create-owner": "tsx scripts/create-owner.ts"
   },
   "engines": {
-    "node": ">=20.9"
+    "node": "22.x"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
