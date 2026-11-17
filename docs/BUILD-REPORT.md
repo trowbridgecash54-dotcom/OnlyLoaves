@@ -6,9 +6,10 @@ Date: 2026-11-17.
 
 | Command | Result |
 | --- | --- |
-| `npm install` | **Not run successfully.** The development sandbox's network policy refused the npm registry: direct DNS lookups for `registry.npmjs.org` failed (`ENOTFOUND`), and the sandbox proxy answered `403 policy denied`. The account's install setting couldn't be changed from this chat. |
-| `npm run build` | **Not run** (depends on the install). The first Vercel deployment runs both on Vercel's servers; see README → Deploy. |
-| `package-lock.json` | Not generated, for the same reason. Commit one after the first green build (README, step 4.5). |
+| `npm install` | **Passed on Vercel** (Node 22.x): 67 packages added. It couldn't run in the development sandbox, whose network policy refused the npm registry (`403 policy denied`), so the install and build ran on Vercel's builder via GitHub. |
+| `npm run build` | **Passed on Vercel**, deployment `dpl_EbUuGcELnUGnqxPnf6zGFXV18P5M` from commit `7c2ccb4`: Next.js 16.4.6 (Turbopack) compiled, TypeScript passed, 31 routes generated, `proxy.ts` detected. |
+| First build | Failed on one error: `lib/backend.ts(78,31): TS2589 Type instantiation is excessively deep`, from supabase-js's generic query-builder types. Fixed by typing the adapter against a small local `Builder`/`Table` interface (no `any`, TypeScript checks still on). `engines.node` pinned to `22.x`. |
+| `package-lock.json` | Not generated yet (no registry access here). Run `npm install` once on any computer and commit the lockfile so later builds use exactly the same versions. |
 
 Declared versions (`package.json`): next ^16.2.0, react / react-dom ^19.2.0, @supabase/supabase-js ^2.100.0, @supabase/ssr ^0.12.0, lucide-react ^1.0.0, motion ^12.0.0, tailwindcss and @tailwindcss/postcss ^4.1.0, typescript ^5.9.0, tsx ^4.20.0. No major-version changes from the previous version except the two Supabase packages, which are new. The ranges were checked against published release information, but never installed.
 
@@ -70,8 +71,8 @@ Run with a local preview server. It uses the project's real pages, components, f
 
 ## Known issues and limits
 
-- **Not built with the real toolchain yet.** The first Vercel build may surface type or API differences in Next.js, `@supabase/ssr`, Lucide or Motion. These were typechecked only against stand-ins.
-- **Fonts:** `next/font` loading of Instrument Serif and DM Sans wasn't exercised; screenshots used substitute fonts.
+- **Deployed, but not yet exercised end to end in production.** The live pages render (checked: home, /bread). Form submissions and dashboard sign-in on the live site still need `SUPABASE_SECRET_KEY` in Vercel and an owner account; neither exists yet.
+- **Fonts:** confirmed on the live site (self-hosted woff2 files preloaded). The sandbox screenshots used substitute fonts.
 - **Supabase Auth settings** (turning off public sign-up, the Site URL) must be changed in the Supabase dashboard; the connector can't.
 - A loaf can be recorded on a date inside the member's first month but before their start date. Minor; the dates are shown in the history.
 - Photos are cropped automatically to fixed frames (centered). There is no manual crop tool.
@@ -85,7 +86,17 @@ The previous version reported 30 open items. Each has been reviewed:
 | --- | --- |
 | **1. Resolved in code** | Website address: no longer a fake `.example` value; it comes from `NEXT_PUBLIC_SITE_URL`, falling back to Vercel's address. Email and Instagram: the fake placeholder values are gone; both are optional, editable in the dashboard, and hidden until set, so no broken links. Editing config files: replaced by the dashboard. |
 | **2. Needs real business information** | Prices (3), ingredients (3), allergens (3), real photos (3) for each loaf; Our Story (5 sections, plus an optional baker photo); homepage and Club photos; pickup days; general pickup area; optional public email and Instagram. |
-| **3. Needs an external service or account** | Supabase secret key in Vercel; owner account created; Vercel deployment; domain (when registered); Resend (optional). |
+| **3. Needs an external service or account** | Supabase secret key in Vercel; owner account created; domain (when registered); Resend (optional). |
 | **4. Needs legal or business-policy confirmation** | Club policies: payment, renewal, pausing and canceling, missed pickups, unused loaves, refunds; cottage-food permit approved; food-label information confirmed; required footer disclosures; then opening ordering. |
 
 The dashboard's checklist now has 39 items. It is more detailed than before: it adds photos, permit, labels, refunds, disclosures, the open-ordering switch and the accounts above. **1 is done** (database connected), **34 required items remain**, and 4 are optional.
+
+## Deployment
+
+| Item | Result |
+| --- | --- |
+| Hosting | Vercel project `onlyloafs` (team `only-loaves`), linked to `github.com/trowbridgecash54-dotcom/OnlyLoaves`. Pushes to `main` deploy automatically. |
+| Production address | https://onlyloafs.vercel.app — fetched without a login: home page title "OnlyLoafs — Small-batch sourdough for local pickup". |
+| Deployment-specific URLs (`*-only-loaves.vercel.app`) | Behind Vercel's deployment protection (redirect to Vercel login) and marked `noindex`. That's Vercel's default and is fine; the production address is public. |
+| Security headers on live responses | HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, referrer and permissions policies present. |
+| Environment variables | Public Supabase URL and publishable key set. `SUPABASE_SECRET_KEY`, `NEXT_PUBLIC_SITE_URL`, Resend variables: not set. |

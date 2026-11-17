@@ -17,8 +17,9 @@ Stack: Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Su
 | --- | --- |
 | Supabase project `OnlyLoafs` (`otmyxbkncfgmuwpqhcan`, us-west-1) | **Created. All 4 migrations applied.** Seeded with the Club plan and 3 sample loaves. |
 | Owner account | **Not created yet** — needs the owner's email. See [Create the owner account](#3-create-the-owner-account). |
-| Vercel deployment | **Not done yet.** See [Deploy to Vercel](#4-deploy-to-vercel). |
-| `npm install` / `npm run build` | **Not yet run on the real toolchain** — the development environment couldn't download packages. The first Vercel deploy runs both. See [If the Vercel build fails](#if-the-vercel-build-fails). |
+| Vercel deployment | **Live at https://onlyloafs.vercel.app** (Vercel project `onlyloafs`, team `only-loaves`, Node 22.x). Linked to the GitHub repo: every push to `main` redeploys. Public pages verified reachable without a login. |
+| Vercel environment variables | `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` set. **`SUPABASE_SECRET_KEY` not set yet** — the owner adds it (Vercel → Project → Settings → Environment Variables), then redeploys. Until then the forms can't save. |
+| `npm install` / `npm run build` | **Passed on Vercel** (2026-11-17): 67 packages installed, Next.js 16.4.6 compiled, TypeScript passed, all 31 routes generated. The first build failed on one type error (TS2589 in `lib/backend.ts`), fixed in commit `7c2ccb4`. |
 | Email (Resend) | Code done and tested with a mocked API. **No account configured;** no real email has been sent. |
 | Ordering | **Closed to the public** by default until the owner opens it in Settings. |
 
@@ -105,7 +106,7 @@ To reset a forgotten password: Authentication → Users → the user → *Send p
 
 ### If the Vercel build fails
 
-This code has been typechecked and tested, but against stand-in type definitions for Next.js, Supabase and React (see the test report), so small API mismatches are possible on the first real build. Open the failed deployment → **Build Logs**, copy the red error lines, and fix them (or paste them to whoever maintains the site). Do not disable TypeScript checks to get past them.
+The build has passed on Vercel. If a later change breaks it, open the failed deployment → **Build Logs**, copy the red error lines, and fix them (or paste them to whoever maintains the site). Do not disable TypeScript checks to get past them.
 
 ### Custom domain (when registered)
 
@@ -132,7 +133,7 @@ Uploaded to the public Supabase Storage bucket `photos` (JPEG/PNG/WebP, max 5 MB
 
 ## 8. Fonts
 
-Instrument Serif and DM Sans load via `next/font/google`: downloaded at build time and self-hosted, with metric-matched fallbacks. Vercel's build needs network access to Google Fonts (it has it). In the sandbox used to write this, the fonts couldn't be downloaded, so the test screenshots use substitute fonts.
+Instrument Serif and DM Sans load via `next/font/google`: downloaded at build time and self-hosted, with metric-matched fallbacks. Vercel's build needs network access to Google Fonts (it has it). Confirmed on the live site: the font files are self-hosted and preloaded. (The sandbox test screenshots used substitute fonts.)
 
 ## 9. Tests
 
