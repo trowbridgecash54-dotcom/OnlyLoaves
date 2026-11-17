@@ -1,0 +1,225 @@
+@import "tailwindcss";
+
+/*
+ * OnlyLoafs design system
+ * ------------------------------------------------------------------
+ * Colors and fonts are defined once here and used across the site as
+ * Tailwind classes: bg-cream, text-espresso, border-wheat, font-serif…
+ */
+
+@theme {
+  /* Brand palette */
+  --color-cream: #f7f3ea;
+  --color-espresso: #302820;
+  --color-wheat: #e9d8b9;
+  --color-olive: #777d61;
+  --color-terracotta: #b56f4d;
+  --color-paper: #fffdf8;
+
+  /*
+   * Deeper olive and terracotta for small text. The brand shades don't
+   * have enough contrast on cream at body sizes, so these two are used
+   * wherever olive or terracotta carries words rather than decoration.
+   */
+  --color-olive-deep: #5c6149;
+  --color-terracotta-deep: #9a5637;
+
+  --ease-settle: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@theme inline {
+  --font-serif:
+    var(--font-instrument-serif), "Iowan Old Style", "Palatino Linotype",
+    Georgia, serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ---------- Type scale ---------- */
+
+@utility type-display {
+  font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
+  font-size: clamp(3.5rem, 1rem + 7vw, 8.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+
+/* The Club price: the largest figure on the site. */
+@utility type-price {
+  font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
+  font-size: clamp(5.5rem, 3.6rem + 8vw, 9.5rem);
+  line-height: 0.78;
+  letter-spacing: -0.03em;
+  font-weight: 400;
+}
+
+@utility type-headline {
+  font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
+  font-size: clamp(2.625rem, 1.6rem + 4.4vw, 5.5rem);
+  line-height: 0.96;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+}
+
+@utility type-title {
+  font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
+  font-size: clamp(1.875rem, 1.55rem + 1.3vw, 2.625rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+}
+
+@utility type-lede {
+  font-size: clamp(1.125rem, 1.04rem + 0.4vw, 1.3125rem);
+  line-height: 1.5;
+}
+
+@utility type-small {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* Small capitals label. Used only where the brand calls for it. */
+@utility type-label {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* ---------- Base ---------- */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    /* Paper grain: a faint speckle so the cream reads as stock, not a flat fill. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .19 0 0 0 0 .16 0 0 0 0 .13 .3 0 0 0 -.11'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-terracotta-deep);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background-color: var(--color-wheat);
+    color: var(--color-espresso);
+  }
+
+  /* Native disclosure triangles are replaced by our own plus/minus mark. */
+  summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+/* ---------- Wordmark ---------- */
+
+@layer components {
+  .wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  /*
+   * The "O" is a scored loaf seen from above. It is sized to the font's
+   * capital height (the `cap` unit) so it sits on the baseline like a
+   * letter; 0.7em is the fallback for older browsers.
+   */
+  .wordmark-o {
+    display: inline-block;
+    flex: none;
+    height: 0.7em;
+    height: 1.06cap;
+    width: auto;
+    margin-right: 0.02em;
+    transform: translateY(0.03cap);
+  }
+
+  /* The dashed tear line across the Club card. */
+  .perforation {
+    border-top: 1.5px dashed color-mix(in srgb, var(--color-espresso) 35%, transparent);
+  }
+
+  /* Plus that turns into a minus when an FAQ item opens. */
+  .faq-mark {
+    position: relative;
+    flex: none;
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  .faq-mark::before,
+  .faq-mark::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1.5px;
+    background-color: currentColor;
+    transition: transform 200ms var(--ease-settle);
+  }
+  .faq-mark::after {
+    transform: rotate(90deg);
+  }
+  details[open] > summary .faq-mark::after {
+    transform: rotate(0deg);
+  }
+}
+
+/* ---------- Motion ---------- */
+
+/* The one orchestrated moment: the homepage hero settling into place. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes unveil {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@utility animate-rise {
+  animation: rise 900ms var(--ease-settle) both;
+}
+
+@utility animate-unveil {
+  animation: unveil 1100ms var(--ease-settle) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
