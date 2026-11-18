@@ -22,6 +22,7 @@ Stack: Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Su
 | `npm install` / `npm run build` | **Passed on Vercel** (2026-11-17): 67 packages installed, Next.js 16.4.6 compiled, TypeScript passed, all 31 routes generated. The first build failed on one type error (TS2589 in `lib/backend.ts`), fixed in commit `7c2ccb4`. |
 | Email (Resend) | Code done and tested with a mocked API. **No account configured;** no real email has been sent. |
 | Ordering | **Closed to the public** by default until the owner opens it in Settings. |
+| Keep-awake | Vercel Cron calls `/api/keepalive` once a day (`vercel.json`, 16:17 UTC). It reads the public Club plan so the free Supabase project never goes a week without activity and gets paused. Optional: set `CRON_SECRET` in Vercel to make the route accept only Vercel's own calls. |
 
 ---
 
